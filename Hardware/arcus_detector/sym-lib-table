@@ -1,4 +1,4 @@
 (sym_lib_table
   (version 7)
-  (lib (name "my_witch_symbols")(type "KiCad")(uri "/Users/akosmelczer/Downloads/SYMBOLS/my_witch_symbols.kicad_sym")(options "")(descr ""))
+  (lib (name "my_witch_symbols")(type "KiCad")(uri "/home/valerija/Documents/ARCUS/Hardware/SYMBOLS/my_witch_symbols.kicad_sym")(options "")(descr ""))
 )
