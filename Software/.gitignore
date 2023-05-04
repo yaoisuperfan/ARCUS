@@ -65,3 +65,6 @@ ctrlp.root
 
 #html
 *.html
+
+*/Debug
+*/Release

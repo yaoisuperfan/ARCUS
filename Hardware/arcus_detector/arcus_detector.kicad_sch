@@ -9157,7 +9157,7 @@
     (property "Reference" "R1" (at 46.863 32.004 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
-    (property "Value" "R_Shunt" (at 46.863 33.909 0)
+    (property "Value" "0.01" (at 46.863 33.909 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Footprint" "" (at 46.99 32.004 90)

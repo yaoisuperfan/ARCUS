@@ -19,10 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "string.h"
-#include <stdio.h>
-#include "arm_math.h"
-#include "arm_const_structs.h"
-
+#include "prog_logic.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -35,10 +32,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define SPI_READ_TIMEOUT	6000
-#define UART_TX_TIMEOUT		6000
-//change according to input voltage and bits
-#define adc_conversion (3.3/2040)
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -76,29 +70,6 @@ PCD_HandleTypeDef hpcd_USB_OTG_FS;
 
 /* USER CODE BEGIN PV */
 
-char uart_output_buf[10];
-
-uint16_t spi_data_buf[2048];
-uint16_t dma_data_buf[2048];
-
-float volt_value;
-
-// __for FFT ____
-
-// uint32_t
-float32_t FFTin[2048];
-float32_t fft_out[1024];
-
-float32_t FFTOutput[1024];
-uint32_t fftSize = 1024, ifftFlag = 0;
-uint32_t maxIdxSecondFFT;
-float32_t maxFFT, maxSecondFFT;
-
-arm_rfft_fast_instance_f32 fft_handler;
-float32_t fft_abs[1024/2];
-
-uint8_t txbuf[1024/2];
-
 
 /* USER CODE END PV */
 
@@ -116,68 +87,7 @@ static void MX_SPI1_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-void SPI_Init(void)
-{
-	HAL_GPIO_WritePin(GPIOB,ch_sel_Pin, GPIO_PIN_RESET);  // chsel PIN , AIN1 selected
 
-    SPI1->CR1|=SPI_CR1_CSTART|SPI_CR1_SPE;
-}
-
-void SPI_Read (void )
-{
-uint16_t spi_data = 0;
-	  for (size_t i = 0; i < 2048; i++)
-	  {
-		  HAL_SPI_Receive(&hspi1, (uint8_t*)&spi_data_buf[i], sizeof(uint16_t), SPI_READ_TIMEOUT);
-	  }
-	uint16_t  adc_val = (uint16_t)*spi_data_buf;
-	volt_value=(float)adc_val* adc_conversion;
-
-}
-
-void DMA_SPI_Read (void)
-{
-	HAL_SPI_Receive_DMA(&hspi1,(uint8_t*)&dma_data_buf, 12);
-	uint16_t  adc_val = (uint16_t)*dma_data_buf;
-		volt_value=(float)adc_val* adc_conversion;
-}
-
-void ADC_ComputeFFT(void)
-{
-	 for (size_t i = 0; i < 1024 ; i++)
-	       {
-	         FFTin[i] = (float32_t)(spi_data_buf[i]) * adc_conversion;
-	       }
-
-
-	uint32_t idx;
-	for(int i = 0; i < 1024; i++)
-	{
-		FFTin[i + 1024] = FFTin[i];
-	}
-	for(int i = 0; i < 1024; i++)//trochu upravit slozeni dat...{Re, Im, Re, Im....}, Im=0.0
-	{
-		FFTin[(2 * i)] = FFTin[i + 1024];
-		FFTin[(2 * i) + 1] = 0.0;
-	}
-	arm_cfft_f32(&arm_cfft_sR_f32_len1024, FFTin, ifftFlag, 1);
-	arm_cmplx_mag_f32(FFTin, FFTOutput, fftSize);
-	arm_max_f32(FFTOutput, 512, &maxFFT, &idx);
-	arm_max_f32(&FFTOutput[idx], 512-idx, &maxSecondFFT, &idx);
-	maxSecondFFT = 100*maxFFT/maxSecondFFT;
-	maxIdxSecondFFT = idx;
-	//SSD1306Bargraph(128, maxFFT*4, FFTOutput, 0, 0, 127);
-
-	for(int i = 0; i < 1024; i++)
-	{
-
-		sprintf(uart_output_buf, "%d\r\n", FFTOutput[i]);
-		size_t buf_size = strlen(uart_output_buf);
-
-		HAL_UART_Transmit(&huart3, (uint8_t*)uart_output_buf, buf_size, UART_TX_TIMEOUT);
-
-	}
-}
 
 /* USER CODE END 0 */
 
@@ -217,19 +127,31 @@ int main(void)
   SPI_Init() ;
 
 
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  	uint8_t test_buff[4096];
+  	HAL_GPIO_WritePin(GPIOB,measure_pin_Pin, GPIO_PIN_RESET);
+
   while (1)
   {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	  HAL_GPIO_WritePin(GPIOB,measure_pin_Pin, GPIO_PIN_SET);
+	  SPI_Read(&hspi1, test_buff, sizeof(test_buff));
+	  HAL_GPIO_WritePin(GPIOB,measure_pin_Pin, GPIO_PIN_RESET);
+	  SPI_Read(&hspi1, test_buff, sizeof(test_buff));
 
-	  SPI_Read();
+//	  ADC_ComputeFFT();
 
-	        ADC_ComputeFFT();
+//	  1. read_from adc and fill readbuffer
+//	  2. run fft on readbuffer output to fftbuffer
+//	  3. evaluate fftbuffer (sum ...)
+
+//	  print_buf_uart(&huart3, (uint8_t*)test_buff, sizeof(test_buff));
   }
   /* USER CODE END 3 */
 }
@@ -366,7 +288,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.CLKPolarity = SPI_POLARITY_HIGH;
   hspi1.Init.CLKPhase = SPI_PHASE_2EDGE;
   hspi1.Init.NSS = SPI_NSS_HARD_OUTPUT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -494,7 +416,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOE_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, LD1_Pin|ch_sel_Pin|LD3_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, LD1_Pin|ch_sel_Pin|LD3_Pin|measure_pin_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(USB_OTG_FS_PWR_EN_GPIO_Port, USB_OTG_FS_PWR_EN_Pin, GPIO_PIN_RESET);
@@ -508,8 +430,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LD1_Pin ch_sel_Pin LD3_Pin */
-  GPIO_InitStruct.Pin = LD1_Pin|ch_sel_Pin|LD3_Pin;
+  /*Configure GPIO pins : LD1_Pin ch_sel_Pin LD3_Pin measure_pin_Pin */
+  GPIO_InitStruct.Pin = LD1_Pin|ch_sel_Pin|LD3_Pin|measure_pin_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
