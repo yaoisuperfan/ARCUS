@@ -22,8 +22,7 @@ float DMA_SPI_Read(SPI_HandleTypeDef *hspi);
 
 void ADC_ComputeFFT(UART_HandleTypeDef *huart);
 
-void print_buf_uart(UART_HandleTypeDef *huart, uint8_t* buf, const size_t len);
-
+void uint16buf_uart(UART_HandleTypeDef *huart, uint16_t* buf, const size_t len);
 
 
 #endif /* SRC_PROG_LOGIC_H_ */

@@ -71,6 +71,8 @@ PCD_HandleTypeDef hpcd_USB_OTG_FS;
 /* USER CODE BEGIN PV */
 
 
+uint16_t test_num;
+unsigned long counter;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -126,32 +128,44 @@ int main(void)
   /* USER CODE BEGIN 2 */
   SPI_Init() ;
 
-
+  uint8_t test_buff[128];
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  	uint8_t test_buff[4096];
-  	HAL_GPIO_WritePin(GPIOB,measure_pin_Pin, GPIO_PIN_RESET);
 
+//  	HAL_GPIO_WritePin(GPIOB,measure_pin_Pin, GPIO_PIN_RESET);
+  counter = 0;
   while (1)
   {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  HAL_GPIO_WritePin(GPIOB,measure_pin_Pin, GPIO_PIN_SET);
+//	  HAL_GPIO_WritePin(GPIOB,measure_pin_Pin, GPIO_PIN_SET);
+//	  SPI_Read(&hspi1, test_buff, sizeof(test_buff));
+//	  HAL_GPIO_WritePin(GPIOB,measure_pin_Pin, GPIO_PIN_RESET);
 	  SPI_Read(&hspi1, test_buff, sizeof(test_buff));
-	  HAL_GPIO_WritePin(GPIOB,measure_pin_Pin, GPIO_PIN_RESET);
-	  SPI_Read(&hspi1, test_buff, sizeof(test_buff));
+
+//	  HAL_SPI_Receive(&hspi1, (uint8_t*)&test_num, sizeof(uint16_t), SPI_READ_TIMEOUT);
+
+//	  for(size_t i = 0; i < sizeof(test_buff); i++)
+//	  {
+//		  test_buff[i] = i;
+//	  }
 
 //	  ADC_ComputeFFT();
 
 //	  1. read_from adc and fill readbuffer
 //	  2. run fft on readbuffer output to fftbuffer
 //	  3. evaluate fftbuffer (sum ...)
-
-//	  print_buf_uart(&huart3, (uint8_t*)test_buff, sizeof(test_buff));
+	  if (counter++ > 10000)
+	  {
+		  counter = 0;
+//		  print_buf_uart(&huart3, (uint8_t*)test_buff, 128);
+		  uint16buf_uart(&huart3, (uint16_t*)test_buff, 64);
+//		  uint16buf_uart(&huart3, (uint16_t*)&test_num, 1);
+	  }
   }
   /* USER CODE END 3 */
 }

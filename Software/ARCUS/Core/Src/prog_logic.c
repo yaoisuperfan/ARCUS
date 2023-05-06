@@ -31,9 +31,9 @@ void SPI_Init(void)
 
 void SPI_Read(SPI_HandleTypeDef *hspi, uint8_t* buf, const size_t len)
 {
-	for (size_t i = 0; i < len; i += sizeof(uint16_t))
+	for (size_t i = 0; i < len; i += 2)
 	{
-		HAL_SPI_Receive(hspi, buf[i], sizeof(uint16_t), SPI_READ_TIMEOUT);
+		HAL_SPI_Receive(hspi, &(buf[i]), 2, SPI_READ_TIMEOUT);
 	}
 }
 
@@ -85,14 +85,15 @@ void ADC_ComputeFFT(UART_HandleTypeDef *huart)
 	}
 }
 
-void print_buf_uart(UART_HandleTypeDef *huart, uint8_t* buf, const size_t len)
+void uint16buf_uart(UART_HandleTypeDef *huart, uint16_t* buf, const size_t len)
 {
-	const size_t t_len = len + 1;
-	uint8_t char_buff[t_len];
+
+	uint8_t num_buf[6];
 	for (size_t i = 0; i < len; i++)
 	{
-		char_buff[i] = buf[i] + 0x30;
+		int s = sprintf(num_buf, "%u,", buf[i]);
+		HAL_UART_Transmit(huart, num_buf, s, UART_TX_TIMEOUT);
 	}
-	char_buff[len] = '\n';
-	HAL_UART_Transmit(huart, char_buff, t_len, UART_TX_TIMEOUT);
+	uint8_t nl = '\n';
+	HAL_UART_Transmit(huart, &nl, 1, UART_TX_TIMEOUT);
 }
