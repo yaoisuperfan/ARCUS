@@ -128,7 +128,11 @@ int main(void)
   /* USER CODE BEGIN 2 */
   SPI_Init() ;
 
-  uint8_t test_buff[128];
+  uint16_t test_buff[BUF_SIZE];
+  float32_t test_conv_buf[BUF_SIZE];
+  float32_t test_fft_out[BUF_SIZE];
+
+  float_t float_buf[]= {1.1,2.2,3.3,4.4,5.5};
 
   /* USER CODE END 2 */
 
@@ -145,7 +149,9 @@ int main(void)
 //	  HAL_GPIO_WritePin(GPIOB,measure_pin_Pin, GPIO_PIN_SET);
 //	  SPI_Read(&hspi1, test_buff, sizeof(test_buff));
 //	  HAL_GPIO_WritePin(GPIOB,measure_pin_Pin, GPIO_PIN_RESET);
-	  SPI_Read(&hspi1, test_buff, sizeof(test_buff));
+	  SPI_Read(&hspi1, test_buff, BUF_SIZE);
+	  adc_conversion(test_buff,test_conv_buf,BUF_SIZE);
+	  ADC_ComputeFFT(test_conv_buf,test_fft_out,BUF_SIZE);
 
 //	  HAL_SPI_Receive(&hspi1, (uint8_t*)&test_num, sizeof(uint16_t), SPI_READ_TIMEOUT);
 
@@ -159,12 +165,14 @@ int main(void)
 //	  1. read_from adc and fill readbuffer
 //	  2. run fft on readbuffer output to fftbuffer
 //	  3. evaluate fftbuffer (sum ...)
-	  if (counter++ > 10000)
+	  if (counter++ > 1000)
 	  {
 		  counter = 0;
 //		  print_buf_uart(&huart3, (uint8_t*)test_buff, 128);
-		  uint16buf_uart(&huart3, (uint16_t*)test_buff, 64);
+//		  uint16buf_uart(&huart3, (uint16_t*)test_buff, BUF_SIZE);
 //		  uint16buf_uart(&huart3, (uint16_t*)&test_num, 1);
+		  float_buf_uart(&huart3, test_fft_out, BUF_SIZE);
+
 	  }
   }
   /* USER CODE END 3 */
