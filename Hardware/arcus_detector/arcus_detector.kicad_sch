@@ -9898,6 +9898,23 @@
     )
   )
 
+  (sheet (at 119.507 186.944) (size 25.781 16.256) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 0 0 0.0000))
+    (uuid 4ce4f427-6061-47dc-8b67-925f2e8b9b14)
+    (property "Sheetname" "prototype" (at 119.507 186.2324 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "untitled.kicad_sch" (at 119.507 203.7846 0)
+      (effects (font (size 1.27 1.27)) (justify left top))
+    )
+    (instances
+      (project "arcus_detector"
+        (path "/1075cd99-b527-424a-8676-af3337dfe390" (page "2"))
+      )
+    )
+  )
+
   (sheet_instances
     (path "/" (page "1"))
   )

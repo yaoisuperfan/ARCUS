@@ -12,16 +12,6 @@ uint16_t dma_data_buf[2048];
 
 
 
-
-
-//
-//arm_rfft_fast_instance_f32 fft_handler;
-//float32_t fft_abs[1024/2];
-//
-//uint8_t txbuf[1024/2];
-
-
-
 void SPI_Init(void)
 {
 	HAL_GPIO_WritePin(GPIOB,ch_sel_Pin, GPIO_PIN_RESET);  // chsel PIN , AIN1 selected
@@ -34,7 +24,6 @@ void SPI_Read(SPI_HandleTypeDef *hspi, uint16_t* buf, const size_t len)
 	for (size_t i = 0; i < len; i++)
 	{
 		HAL_SPI_Receive(hspi, (uint8_t*)&(buf[i]), 2, SPI_READ_TIMEOUT);
-
 	}
 }
 
@@ -64,7 +53,14 @@ void ADC_ComputeFFT(float32_t* in_buf,float32_t* out_buf,const size_t len)
 
 }
 
+void SPI_Transmit_PGA(SPI_HandleTypeDef *hspi)
+{
+	uint8_t tx_data[2];
+	tx_data[0] = 0b01000000; //64
+	tx_data[1] = 0b00000001; //1
 
+	HAL_SPI_Transmit(hspi, tx_data, 2, SPI_READ_TIMEOUT);
+}
 
 void uint16buf_uart(UART_HandleTypeDef *huart, uint16_t* buf, const size_t len)
 {

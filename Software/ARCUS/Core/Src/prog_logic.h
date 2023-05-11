@@ -27,6 +27,8 @@ void adc_conversion(uint16_t*buf,float32_t* f_buf,const size_t len);
 
 void ADC_ComputeFFT(float32_t* in_buf,float32_t* out_buf,const size_t len);
 
+void SPI_Transmit_PGA(SPI_HandleTypeDef *hspi);
+
 void uint16buf_uart(UART_HandleTypeDef *huart, uint16_t* buf, const size_t len);
 
 void float_buf_uart(UART_HandleTypeDef *huart, float32_t* buf, const size_t len);
