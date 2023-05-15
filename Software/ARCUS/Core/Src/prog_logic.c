@@ -53,12 +53,13 @@ void ADC_ComputeFFT(float32_t* in_buf,float32_t* out_buf,const size_t len)
 
 }
 
+void
+
 void SPI_Transmit_PGA(SPI_HandleTypeDef *hspi)
 {
 	uint8_t tx_data[2];
 	tx_data[0] = 0b01000000; //64
-	tx_data[1] = 0b00000001; //1
-
+	tx_data[1] = 0b00000100; //2
 	HAL_SPI_Transmit(hspi, tx_data, 2, SPI_READ_TIMEOUT);
 }
 
@@ -81,7 +82,7 @@ void float_buf_uart(UART_HandleTypeDef *huart, float32_t* buf, const size_t len)
 	for (size_t i = 0; i < len; i++)
 	{
 		int s = sprintf(num_buf, "%.2f,", buf[i]);
-		HAL_UART_Transmit(huart, num_buf, s, UART_TX_TIMEOUT);
+		HAL_UART_Transmit(huart, (uint8_t*)num_buf, s, UART_TX_TIMEOUT);
 	}
 	uint8_t nl = '\n';
 	HAL_UART_Transmit(huart, &nl, 1, UART_TX_TIMEOUT);

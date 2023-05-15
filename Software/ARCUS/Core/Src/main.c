@@ -148,6 +148,9 @@ int main(void)
 
 
   counter = 0;
+  int is_tresh_set = false;
+
+  float32_t tresh = 0;
   while (1)
   {
     /* USER CODE END WHILE */
@@ -162,6 +165,27 @@ int main(void)
 //	  ADC_ComputeFFT(test_conv_buf,test_fft_out,BUF_SIZE);
 
 
+	  //summing of fft
+	  float32_t new_data = float_buf_sum(test_fft_out);
+
+	  //only first time
+	  if(is_tresh_set == false)
+	  {
+		  is_tresh_set = true;
+		  tresh = new_data * 2;
+	  }
+
+	  //detection
+	  if(new_data > tresh)
+	  {
+		  //arc
+	  }
+	  else
+	  {
+		  //no arc
+	  }
+
+
 //	  HAL_SPI_Receive(&hspi1, (uint8_t*)&test_num, sizeof(uint16_t), SPI_READ_TIMEOUT);
 
 //	  for(size_t i = 0; i < sizeof(test_buff); i++)
@@ -174,7 +198,7 @@ int main(void)
 //	  1. read_from adc and fill readbuffer
 //	  2. run fft on readbuffer output to fftbuffer
 //	  3. evaluate fftbuffer (sum ...)
-	  if (counter++ > 1000)
+	  if (counter++ > 100)
 	  {
 		  counter = 0;
 //		  print_buf_uart(&huart3, (uint8_t*)test_buff, 128);
