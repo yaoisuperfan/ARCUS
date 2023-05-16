@@ -139,6 +139,8 @@ int main(void)
 
   float_t float_buf[]= {1.1,2.2,3.3,4.4,5.5};
 
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -148,56 +150,62 @@ int main(void)
 
 
   counter = 0;
-  int is_tresh_set = false;
-
+  int is_tresh_set = 0;
   float32_t tresh = 0;
+  int peaks[BUF_SIZE];
   while (1)
   {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-//	  HAL_GPIO_WritePin(GPIOB,measure_pin_Pin, GPIO_PIN_SET);
-//	  SPI_Read(&hspi1, test_buff, sizeof(test_buff));
-//	  HAL_GPIO_WritePin(GPIOB,measure_pin_Pin, GPIO_PIN_RESET);
 
 	  SPI_Read(&hspi1, test_buff, BUF_SIZE);
-//	  adc_conversion(test_buff,test_conv_buf,BUF_SIZE);
-//	  ADC_ComputeFFT(test_conv_buf,test_fft_out,BUF_SIZE);
+	  adc_conversion(test_buff,test_conv_buf,BUF_SIZE);
+	  ADC_ComputeFFT(test_conv_buf,test_fft_out,BUF_SIZE);
 
-
-	  //summing of fft
-	  float32_t new_data = float_buf_sum(test_fft_out);
 
 	  //only first time
-	  if(is_tresh_set == false)
+	  if(is_tresh_set == 0)
 	  {
-		  is_tresh_set = true;
-		  tresh = new_data * 2;
-	  }
+		  float32_t peak_tresh = (float_buf_sum(test_fft_out, BUF_SIZE)/BUF_SIZE) * 2; //fft_avg * 2
+		  is_tresh_set = 1;
+		  for (size_t i = 0; i < BUF_SIZE; i++)
+		  {
+			  peaks[i] = 0;
+			  if(test_fft_out[i] > peak_tresh)
+			  {
+				  peaks[i] = 1;
+			  }
+		  }
 
-	  //detection
-	  if(new_data > tresh)
-	  {
-		  //arc
+		  eliminate_peaks(test_fft_out, peaks, BUF_SIZE);
+
+		  tresh = float_buf_sum(test_fft_out, BUF_SIZE) * 2;
 	  }
 	  else
 	  {
-		  //no arc
+		  eliminate_peaks(test_fft_out, peaks, BUF_SIZE);
+		  float32_t new_data = float_buf_sum(test_fft_out, BUF_SIZE);
+		  if(new_data > tresh)
+		  {
+			  arc_uart(&huart3);
+		  }
+		  else
+		  {
+			  no_arc_uart(&huart3);
+		  }
 	  }
 
+	  //detection
 
-//	  HAL_SPI_Receive(&hspi1, (uint8_t*)&test_num, sizeof(uint16_t), SPI_READ_TIMEOUT);
 
-//	  for(size_t i = 0; i < sizeof(test_buff); i++)
-//	  {
-//		  test_buff[i] = i;
-//	  }
 
 //	  ADC_ComputeFFT();
 
 //	  1. read_from adc and fill readbuffer
 //	  2. run fft on readbuffer output to fftbuffer
 //	  3. evaluate fftbuffer (sum ...)
+
 	  if (counter++ > 100)
 	  {
 		  counter = 0;
