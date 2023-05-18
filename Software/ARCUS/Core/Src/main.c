@@ -137,7 +137,7 @@ int main(void)
   float32_t test_conv_buf[BUF_SIZE];
   float32_t test_fft_out[BUF_SIZE];
 
-  float_t float_buf[]= {1.1,2.2,3.3,4.4,5.5};
+
 
 
 
@@ -146,7 +146,7 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-//  	HAL_GPIO_WritePin(GPIOB,measure_pin_Pin, GPIO_PIN_RESET);
+//
 
 
   counter = 0;
@@ -189,10 +189,12 @@ int main(void)
 		  if(new_data > tresh)
 		  {
 			  arc_uart(&huart3);
+			  HAL_GPIO_WritePin(GPIOB,measure_pin_Pin, GPIO_PIN_SET);
 		  }
 		  else
 		  {
 			  no_arc_uart(&huart3);
+			  HAL_GPIO_WritePin(GPIOB,measure_pin_Pin, GPIO_PIN_RESET);
 		  }
 	  }
 
@@ -210,7 +212,7 @@ int main(void)
 	  {
 		  counter = 0;
 //		  print_buf_uart(&huart3, (uint8_t*)test_buff, 128);
-		  uint16buf_uart(&huart3, (uint16_t*)test_buff, BUF_SIZE);
+//		  uint16buf_uart(&huart3, (uint16_t*)test_buff, BUF_SIZE);
 //		  uint16buf_uart(&huart3, (uint16_t*)&test_num, 1);
 //		  float_buf_uart(&huart3, test_fft_out, BUF_SIZE);
 
