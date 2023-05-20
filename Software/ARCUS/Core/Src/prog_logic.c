@@ -67,7 +67,7 @@ void SPI_Transmit_PGA(SPI_HandleTypeDef *hspi)
 {
 	uint8_t tx_data[2];
 	tx_data[0] = 0b01000000; //64
-	tx_data[1] = 0b00000110; //2
+	tx_data[1] = 0b00000110; //16
 	HAL_SPI_Transmit(hspi, tx_data, 2, SPI_READ_TIMEOUT);
 }
 
@@ -110,6 +110,7 @@ void eliminate_peaks(float32_t* data_buf, int* peaks, size_t len)
 void arc_uart(UART_HandleTypeDef *huart)
 {
 	uint8_t buf[] = "Arc detected\r\n"; //Data to send
+	HAL_GPIO_WritePin(GPIOB,DE_Pin, GPIO_PIN_SET);
 	HAL_UART_Transmit(huart,buf,sizeof(buf),10);// Sending in normal mode
 	HAL_Delay(1000);
 }
@@ -117,6 +118,7 @@ void arc_uart(UART_HandleTypeDef *huart)
 void no_arc_uart(UART_HandleTypeDef *huart)
 {
 	uint8_t buf[] = "No arc\r\n"; //Data to send
+	HAL_GPIO_WritePin(GPIOB,DE_Pin, GPIO_PIN_SET);
 	HAL_UART_Transmit(huart,buf,sizeof(buf),10);// Sending in normal mode
 	HAL_Delay(1000);
 }

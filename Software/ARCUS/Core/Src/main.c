@@ -66,6 +66,7 @@ ETH_HandleTypeDef heth;
 SPI_HandleTypeDef hspi1;
 SPI_HandleTypeDef hspi4;
 
+UART_HandleTypeDef huart4;
 UART_HandleTypeDef huart3;
 
 PCD_HandleTypeDef hpcd_USB_OTG_FS;
@@ -85,6 +86,7 @@ static void MX_USART3_UART_Init(void);
 static void MX_USB_OTG_FS_PCD_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_SPI4_Init(void);
+static void MX_UART4_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -129,6 +131,7 @@ int main(void)
   MX_USB_OTG_FS_PCD_Init();
   MX_SPI1_Init();
   MX_SPI4_Init();
+  MX_UART4_Init();
   /* USER CODE BEGIN 2 */
   SPI_Init() ;
   SPI_Transmit_PGA(&hspi4);
@@ -178,23 +181,23 @@ int main(void)
 			  }
 		  }
 
-		  eliminate_peaks(test_fft_out, peaks, BUF_SIZE);
+//		  eliminate_peaks(test_fft_out, peaks, BUF_SIZE);
 
 		  tresh = float_buf_sum(test_fft_out, BUF_SIZE) * 2;
 	  }
 	  else
 	  {
-		  eliminate_peaks(test_fft_out, peaks, BUF_SIZE);
+//		  eliminate_peaks(test_fft_out, peaks, BUF_SIZE);
 		  float32_t new_data = float_buf_sum(test_fft_out, BUF_SIZE);
 		  if(new_data > tresh)
 		  {
-			  arc_uart(&huart3);
-			  HAL_GPIO_WritePin(GPIOB,measure_pin_Pin, GPIO_PIN_SET);
+			  arc_uart(&huart4);
+
 		  }
 		  else
 		  {
-			  no_arc_uart(&huart3);
-			  HAL_GPIO_WritePin(GPIOB,measure_pin_Pin, GPIO_PIN_RESET);
+			  no_arc_uart(&huart4);
+
 		  }
 	  }
 
@@ -214,7 +217,7 @@ int main(void)
 //		  print_buf_uart(&huart3, (uint8_t*)test_buff, 128);
 //		  uint16buf_uart(&huart3, (uint16_t*)test_buff, BUF_SIZE);
 //		  uint16buf_uart(&huart3, (uint16_t*)&test_num, 1);
-//		  float_buf_uart(&huart3, test_fft_out, BUF_SIZE);
+//		  float_buf_uart(&huart3, &tresh, BUF_SIZE);
 
 	  }
   }
@@ -427,6 +430,54 @@ static void MX_SPI4_Init(void)
 }
 
 /**
+  * @brief UART4 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_UART4_Init(void)
+{
+
+  /* USER CODE BEGIN UART4_Init 0 */
+
+  /* USER CODE END UART4_Init 0 */
+
+  /* USER CODE BEGIN UART4_Init 1 */
+
+  /* USER CODE END UART4_Init 1 */
+  huart4.Instance = UART4;
+  huart4.Init.BaudRate = 115200;
+  huart4.Init.WordLength = UART_WORDLENGTH_8B;
+  huart4.Init.StopBits = UART_STOPBITS_1;
+  huart4.Init.Parity = UART_PARITY_NONE;
+  huart4.Init.Mode = UART_MODE_TX_RX;
+  huart4.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart4.Init.OverSampling = UART_OVERSAMPLING_16;
+  huart4.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+  huart4.Init.ClockPrescaler = UART_PRESCALER_DIV1;
+  huart4.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  if (HAL_UART_Init(&huart4) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_SetTxFifoThreshold(&huart4, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_SetRxFifoThreshold(&huart4, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_DisableFifoMode(&huart4) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN UART4_Init 2 */
+
+  /* USER CODE END UART4_Init 2 */
+
+}
+
+/**
   * @brief USART3 Initialization Function
   * @param None
   * @retval None
@@ -529,7 +580,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOG_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, LD1_Pin|ch_sel_Pin|LD3_Pin|measure_pin_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, LD1_Pin|DE_Pin|LD3_Pin|ch_sel_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(USB_OTG_FS_PWR_EN_GPIO_Port, USB_OTG_FS_PWR_EN_Pin, GPIO_PIN_RESET);
@@ -543,8 +594,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LD1_Pin ch_sel_Pin LD3_Pin measure_pin_Pin */
-  GPIO_InitStruct.Pin = LD1_Pin|ch_sel_Pin|LD3_Pin|measure_pin_Pin;
+  /*Configure GPIO pins : LD1_Pin DE_Pin LD3_Pin ch_sel_Pin */
+  GPIO_InitStruct.Pin = LD1_Pin|DE_Pin|LD3_Pin|ch_sel_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
